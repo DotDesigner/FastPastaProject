@@ -70,6 +70,7 @@ namespace StarterAssets
         private float _verticalVelocity;
         private float _terminalVelocity = 53.0f;
         private float targetspeed;
+        private float treshold = 0.01f;
 
         // timeout deltatime
         private float _jumpTimeoutDelta;
@@ -188,11 +189,14 @@ namespace StarterAssets
                 _speed = Mathf.Lerp(currentHorizontalSpeed, targetspeed * inputMagnitude, Time.deltaTime * smoothTime);
 
                 // round speed to 3 decimal places
-                _speed = Mathf.Round(_speed * 1000f) / 1000f;
+                _speed = Mathf.Round(_speed * 1000) / 1000;
             }
             else
             {
-               // transform.position = Vector2.SmoothDamp(inputdir, Vector2.zero, ref smoothDampVelocity, smoothTime);
+                if (Mathf.Abs(_speed) < treshold)
+                {
+                    _speed = 0;
+                }
             }
             SlopeController();
             // normalise input direction
