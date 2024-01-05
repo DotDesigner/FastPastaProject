@@ -39,7 +39,3 @@ sysinfo.txt
 
 # Crashlytics generated file
 Assets/StreamingAssets/crashlytics-build.properties
-
-/target
-/Cargo.lock
-issue.closed.json
