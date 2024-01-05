@@ -71,6 +71,14 @@ namespace StarterAssets
         private float _terminalVelocity = 53.0f;
         private float targetspeed;
         private float treshold = 0.01f;
+        private float slopeAngle;
+        private float slideSpeed;
+        private Vector3 hitNormal;
+        private Vector3 slideDirection;
+        private float checkDistance;
+        private float currentHorizontalSpeed;
+        private float speedOffset;
+        private float inputMagnitude;
 
         // timeout deltatime
         private float _jumpTimeoutDelta;
@@ -175,10 +183,10 @@ namespace StarterAssets
             }
 
             // a reference to the players current horizontal velocity
-            float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
+            currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
 
-            float speedOffset = 0.1f;
-            float inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
+            speedOffset = 0.1f;
+            inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
             _speed = Mathf.Lerp(_speed, targetspeed, Time.deltaTime * SpeedChangeRate);
             Debug.Log("Current Speed: " + _speed);
 
@@ -273,7 +281,7 @@ namespace StarterAssets
         private bool IsOnSlope(out Vector3 hitNormal, out float slopeAngle)
         {
             RaycastHit hit;
-            float checkDistance = _controller.height / 2 + GroundedOffset;
+            checkDistance = _controller.height / 2 + GroundedOffset;
             bool hitDetected = Physics.Raycast(transform.position, Vector3.down, out hit, checkDistance, GroundLayers);
             hitNormal = Vector3.up;
             slopeAngle = 0f;
@@ -292,19 +300,13 @@ namespace StarterAssets
 
             if (Grounded && _input.slide)
             {
-                Vector3 hitNormal;
-                float slopeAngle;
                 if (IsOnSlope(out hitNormal, out slopeAngle))
                 {
-                    float slideSpeed = Mathf.Lerp(0, MaxSlideSpeed, slopeAngle / 90f);
+                    slideSpeed = Mathf.Lerp(0, MaxSlideSpeed, slopeAngle / 90f);
                     Debug.Log("Sliding Speed: " + slideSpeed);
 
-                    Vector3 slideDirection = new Vector3(hitNormal.x, -hitNormal.y, hitNormal.z);
+                    slideDirection = new Vector3(hitNormal.x, -hitNormal.y, hitNormal.z);
                     _controller.Move(slideDirection.normalized * slideSpeed * Time.deltaTime);
-                   // if (slopeAngle <= 2)
-                    //{
-                    //    slideSpeed = Mathf.Lerp(_speed, 0, Time.deltaTime);
-                   // }
                 }
             }
             else
