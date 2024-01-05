@@ -194,7 +194,7 @@ namespace StarterAssets
             }
 
             // normalise input direction
-            Vector3 inputDirection = new Vector3(_input.move.x, 0.0f, _input.move.y).normalized;
+            Vector3 inputDirection = Vector3.zero;
             if (_input.move != Vector2.zero)
             {
                 inputDirection = transform.right * _input.move.x + transform.forward * _input.move.y;
@@ -212,25 +212,17 @@ namespace StarterAssets
                 float slopeAngle;
                 if (IsOnSlope(out hitNormal, out slopeAngle))
                 {
-                    // Calculate sliding speed based on slope angle
-                    float slideSpeed = Mathf.Lerp(0, MaxSlideSpeed, slopeAngle / 90f); // Assuming MaxSlideSpeed is reached at 90 degrees
-
-                    // Debug statement to log the current sliding speed
+                    float slideSpeed = Mathf.Lerp(0, MaxSlideSpeed, slopeAngle / 90f);
                     Debug.Log("Sliding Speed: " + slideSpeed);
 
                     Vector3 slideDirection = new Vector3(hitNormal.x, -hitNormal.y, hitNormal.z);
-                    _controller.Move(inputDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+                    _controller.Move(slideDirection.normalized * slideSpeed * Time.deltaTime);
                 }
             }
             else
             {
-                // Normal movement logic
-                Vector3 inputDirection1 = new Vector3(_input.move.x, 0.0f, _input.move.y).normalized;
-                if (_input.move != Vector2.zero)
-                {
-                    inputDirection1 = transform.right * _input.move.x + transform.forward * _input.move.y;
-                }
-                _controller.Move(inputDirection1.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+                _speed = Mathf.Lerp(_speed, (_input.move == Vector2.zero) ? 0f : targetSpeed, Time.deltaTime * SpeedChangeRate);
+                _controller.Move(inputDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
             }
 
             // move the player
