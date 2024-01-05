@@ -165,13 +165,19 @@ namespace StarterAssets
             float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
 
             // if there is no input, set the target speed to 0
-            if (_input.move == Vector2.zero) targetSpeed = 0.0f;
+            if (_input.move == Vector2.zero)
+            {
+                // Decelerate to a stop smoothly
+                targetSpeed = 0.0f;
+            }
 
             // a reference to the players current horizontal velocity
             float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
 
             float speedOffset = 0.1f;
             float inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
+            _speed = Mathf.Lerp(_speed, targetSpeed, Time.deltaTime * SpeedChangeRate);
+            Debug.Log("Current Speed: " + _speed);
 
             // accelerate or decelerate to target speed
             if (currentHorizontalSpeed < targetSpeed - speedOffset || currentHorizontalSpeed > targetSpeed + speedOffset)
@@ -189,7 +195,10 @@ namespace StarterAssets
 
             // normalise input direction
             Vector3 inputDirection = new Vector3(_input.move.x, 0.0f, _input.move.y).normalized;
-
+            if (_input.move != Vector2.zero)
+            {
+                inputDirection = transform.right * _input.move.x + transform.forward * _input.move.y;
+            }
             // if there is a move input rotate player when the player is moving
             if (_input.move != Vector2.zero)
             {
@@ -197,14 +206,20 @@ namespace StarterAssets
                 inputDirection = transform.right * _input.move.x + transform.forward * _input.move.y;
             }
 
-            if (Grounded && _input.slide) // Check if grounded and slide button is pressed
+            if (Grounded && _input.slide)
             {
                 Vector3 hitNormal;
-                if (IsOnSlope(out hitNormal))
+                float slopeAngle;
+                if (IsOnSlope(out hitNormal, out slopeAngle))
                 {
+                    // Calculate sliding speed based on slope angle
+                    float slideSpeed = Mathf.Lerp(0, MaxSlideSpeed, slopeAngle / 90f); // Assuming MaxSlideSpeed is reached at 90 degrees
+
+                    // Debug statement to log the current sliding speed
+                    Debug.Log("Sliding Speed: " + slideSpeed);
+
                     Vector3 slideDirection = new Vector3(hitNormal.x, -hitNormal.y, hitNormal.z);
-                    _controller.Move(slideDirection.normalized * SlideSpeed * Time.deltaTime);
-                    _speed = Mathf.Min(_speed + SlideSpeed * Time.deltaTime, MaxSlideSpeed);
+                    _controller.Move(inputDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
                 }
             }
             else
@@ -276,27 +291,22 @@ namespace StarterAssets
 			return Mathf.Clamp(lfAngle, lfMin, lfMax);
 		}
 
-        private bool IsOnSlope(out Vector3 hitNormal)
+        private bool IsOnSlope(out Vector3 hitNormal, out float slopeAngle)
         {
             RaycastHit hit;
-            // Make sure the raycast distance is positive and sufficiently long to reach the ground
             float checkDistance = _controller.height / 2 + GroundedOffset;
             bool hitDetected = Physics.Raycast(transform.position, Vector3.down, out hit, checkDistance, GroundLayers);
+            hitNormal = Vector3.up;
+            slopeAngle = 0f;
 
-            Debug.Log($"Raycast hit: {hitDetected}, Distance: {checkDistance}");
             if (hitDetected)
             {
                 hitNormal = hit.normal;
-                float slopeAngle = Vector3.Angle(Vector3.up, hitNormal);
-                Debug.Log($"Hit normal: {hitNormal}, Slope angle: {slopeAngle}, Slope limit: {_controller.slopeLimit}");
+                slopeAngle = Vector3.Angle(Vector3.up, hitNormal);
+                return true;
+            }
 
-                return slopeAngle > _controller.slopeLimit;
-            }
-            else
-            {
-                hitNormal = Vector3.up;
-                return false;
-            }
+            return false;
         }
 
         private void OnDrawGizmosSelected()
