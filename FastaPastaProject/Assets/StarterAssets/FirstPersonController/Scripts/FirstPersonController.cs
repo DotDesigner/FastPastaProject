@@ -122,7 +122,6 @@ namespace StarterAssets
         {
             JumpAndGravity();
             GroundedCheck();
-            CheckForSlideInput();
             Move();
         }
 
@@ -198,21 +197,25 @@ namespace StarterAssets
                 inputDirection = transform.right * _input.move.x + transform.forward * _input.move.y;
             }
 
-            if (Grounded && _isSliding)
+            if (Grounded && _input.slide) // Check if grounded and slide button is pressed
             {
-                Debug.Log("Attempting to slide");
                 Vector3 hitNormal;
                 if (IsOnSlope(out hitNormal))
                 {
-                    Debug.Log("On slope, applying slide");
                     Vector3 slideDirection = new Vector3(hitNormal.x, -hitNormal.y, hitNormal.z);
                     _controller.Move(slideDirection.normalized * SlideSpeed * Time.deltaTime);
                     _speed = Mathf.Min(_speed + SlideSpeed * Time.deltaTime, MaxSlideSpeed);
                 }
-                else
+            }
+            else
+            {
+                // Normal movement logic
+                Vector3 inputDirection1 = new Vector3(_input.move.x, 0.0f, _input.move.y).normalized;
+                if (_input.move != Vector2.zero)
                 {
-                    Debug.Log("Not on slope");
+                    inputDirection1 = transform.right * _input.move.x + transform.forward * _input.move.y;
                 }
+                _controller.Move(inputDirection1.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
             }
 
             // move the player
@@ -272,12 +275,6 @@ namespace StarterAssets
 			if (lfAngle > 360f) lfAngle -= 360f;
 			return Mathf.Clamp(lfAngle, lfMin, lfMax);
 		}
-
-        private void CheckForSlideInput()
-        {
-            // Replace "slide" with your actual slide input button
-            _isSliding = _input.slide;
-        }
 
         private bool IsOnSlope(out Vector3 hitNormal)
         {
