@@ -101,6 +101,8 @@ namespace StarterAssets
 
         private const float _threshold = 0.01f;
 
+        public SwingMechanic swingMechanic;
+
         private bool IsCurrentDeviceMouse
         {
             get
@@ -135,10 +137,14 @@ namespace StarterAssets
 
         private void Update()
         {
-            JumpAndGravity();
-            GroundedCheck();
-            Move();
-            MaxSlideSpeed = currentHorizontalSpeed * 3;
+            if (!swingMechanic.isSwinging)
+            {
+                JumpAndGravity();
+                GroundedCheck();
+                Move();
+                MaxSlideSpeed = currentHorizontalSpeed * 3;
+            }
+
         }
 
         private void LateUpdate()
