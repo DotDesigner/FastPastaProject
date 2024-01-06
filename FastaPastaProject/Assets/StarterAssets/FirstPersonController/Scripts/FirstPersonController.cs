@@ -65,14 +65,16 @@ namespace StarterAssets
         [Tooltip("The maximum speed the player can reach while sliding")]
 
 
-
+        [Header("NOT CHENGABLE")]
         private Vector3 inputdir;
+        public Vector3 previousPosition;
+        public float _speed;
 
         // cinemachine
         private float _cinemachineTargetPitch;
 
         // player
-        private float _speed;
+
         private float _rotationVelocity;
         private float _verticalVelocity;
         private float _terminalVelocity = 53.0f;
@@ -137,13 +139,11 @@ namespace StarterAssets
 
         private void Update()
         {
-            if (!swingMechanic.isSwinging)
-            {
-                JumpAndGravity();
-                GroundedCheck();
-                Move();
-                MaxSlideSpeed = currentHorizontalSpeed * 3;
-            }
+
+            JumpAndGravity();
+            GroundedCheck();
+            Move();
+            MaxSlideSpeed = currentHorizontalSpeed * 3;
 
         }
 
@@ -282,11 +282,19 @@ namespace StarterAssets
 
 
 			// apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
-			if (_verticalVelocity < _terminalVelocity)
-			{
-				_verticalVelocity += Gravity * Time.deltaTime;
-			}
+
+                if (_verticalVelocity < _terminalVelocity)
+                {
+                    _verticalVelocity += Gravity * Time.deltaTime;
+                }
+
+
 		}
+
+        public void ResetVerticalVelocity()
+        {
+            _verticalVelocity = 0.0f;
+        }
 
 		private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
 		{

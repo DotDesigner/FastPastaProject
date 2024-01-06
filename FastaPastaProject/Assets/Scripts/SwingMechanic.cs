@@ -17,6 +17,7 @@ public class SwingMechanic : MonoBehaviour
     public Rigidbody rb;
     public bool isSwinging;
     private bool wasSwingingLastFrame;
+    private float speedToTransform;
 
 
     private void Start()
@@ -36,10 +37,7 @@ public class SwingMechanic : MonoBehaviour
         {
             isSwinging = true;
             StartGrapple();
-            characterController.enabled = false;
-            gameObject.AddComponent<Rigidbody>();
-            rb = gameObject.GetComponent<Rigidbody>();
-            rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
+
         }
         else if (!_input.swing && wasSwingingLastFrame)
         {
@@ -58,6 +56,14 @@ public class SwingMechanic : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(cameraTip.position, cameraTip.forward, out hit, maxGrappleDistance, whatIsGrappleavle))
         {
+            characterController.enabled = false;
+            gameObject.AddComponent<Rigidbody>();
+            rb = gameObject.GetComponent<Rigidbody>();
+            rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
+            speedToTransform = firstPersonController._speed;
+            Vector3 directionOfMovement = transform.forward;
+            rb.velocity = directionOfMovement * (speedToTransform * 2);
+
             grapplePoint = hit.point;
             joints = player.gameObject.AddComponent<SpringJoint>();
             joints.autoConfigureConnectedAnchor = false;
@@ -91,5 +97,6 @@ public class SwingMechanic : MonoBehaviour
             Destroy(rb);
         }
         characterController.enabled = true;
+        firstPersonController.ResetVerticalVelocity();
     }
 }
