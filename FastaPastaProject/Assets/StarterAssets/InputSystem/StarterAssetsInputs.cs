@@ -13,6 +13,7 @@ namespace StarterAssets
         public bool jump;
         public bool sprint;
         public bool slide; // Add this for slide input
+        public bool swing;
 
         [Header("Movement Settings")]
         public bool analogMovement;
@@ -50,6 +51,11 @@ namespace StarterAssets
         {
             SlideInput(value.isPressed);
         }
+
+        public void OnSwing(InputValue value)
+        {
+            SwingInput(value.isPressed);
+        }
 #endif
 
         public void MoveInput(Vector2 newMoveDirection)
@@ -76,7 +82,10 @@ namespace StarterAssets
         public void SlideInput(bool newSlideState)
         {
             slide = newSlideState;
-            Debug.Log("Slide input state changed: " + slide);
+        }
+        public void SwingInput(bool newSwingState)
+        {
+            swing = newSwingState;
         }
 
         private void OnApplicationFocus(bool hasFocus)
