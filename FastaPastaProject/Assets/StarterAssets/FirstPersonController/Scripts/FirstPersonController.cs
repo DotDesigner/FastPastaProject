@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -53,12 +54,14 @@ namespace StarterAssets
         public float BottomClamp = -90.0f;
 
         [Header("Sliding")]
-
-        [Tooltip("The maximum speed the player can reach while sliding")]
+        public bool slideBoost = false;
         private float MaxSlideSpeed;
         public float VelocityOnFlat;
         public float VelocityRegular;
-        private Vector2 smoothDampVelocity;
+
+        [Tooltip("The maximum speed the player can reach while sliding")]
+
+
 
         private Vector3 inputdir;
 
@@ -80,6 +83,7 @@ namespace StarterAssets
         private float speedOffset;
         private float inputMagnitude;
         private bool isSlide;
+        private bool coorutineStarted;
 
         // timeout deltatime
         private float _jumpTimeoutDelta;
@@ -108,11 +112,7 @@ namespace StarterAssets
 
         private void Awake()
         {
-            // get a reference to our main camera
-            if (_mainCamera == null)
-            {
-                _mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
-            }
+           _mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
         }
 
         private void Start()
@@ -208,10 +208,10 @@ namespace StarterAssets
                 inputdir = transform.right * _input.move.x + transform.forward * _input.move.y;
             }
 
-            if (_speed >= 9)
+            if (_speed >= 15)
             {
-                _speed = 9;
-                currentHorizontalSpeed = 9;
+                _speed = 15;
+                currentHorizontalSpeed = 15;
 
             }
 
@@ -233,6 +233,8 @@ namespace StarterAssets
 				// Jump
 				if (_input.jump && _jumpTimeoutDelta <= 0.0f)
 				{
+
+
 					// the square root of H * -2 * G = how much velocity needed to reach desired height
 					_verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
 				}
@@ -245,6 +247,7 @@ namespace StarterAssets
 			}
 			else
 			{
+
 				// reset the jump timeout timer
 				_jumpTimeoutDelta = JumpTimeout;
 
@@ -257,6 +260,17 @@ namespace StarterAssets
 				// if we are not grounded, do not jump
 				_input.jump = false;
 			}
+            if (!Grounded)
+            {
+                slideBoost = true;
+                coorutineStarted = false;
+            }
+            else if (Grounded && slideBoost && !coorutineStarted)
+            {
+                coorutineStarted = true;
+                StartCoroutine(JumpSlopeBoost());
+            }
+
 
 			// apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
 			if (_verticalVelocity < _terminalVelocity)
@@ -271,6 +285,13 @@ namespace StarterAssets
 			if (lfAngle > 360f) lfAngle -= 360f;
 			return Mathf.Clamp(lfAngle, lfMin, lfMax);
 		}
+
+        IEnumerator JumpSlopeBoost()
+        {
+            yield return new WaitForSeconds(0.2f);
+            slideBoost = false;
+            coorutineStarted = false;
+        }
 
         private bool IsOnSlope(out Vector3 hitNormal, out float slopeAngle)
         {
