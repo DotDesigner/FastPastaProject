@@ -22,6 +22,7 @@ namespace StarterAssets
         [Tooltip("Acceleration and deceleration")]
         public float SpeedChangeRate = 10.0f;
         public float smoothTime = 2f;
+        public float SpeedHardCap;
 
         [Space(10)]
         [Tooltip("The height the player can jump")]
@@ -210,10 +211,10 @@ namespace StarterAssets
                 inputdir = transform.right * _input.move.x + transform.forward * _input.move.y;
             }
 
-            if (_speed >= 15)
+            if (_speed >= SpeedHardCap)
             {
-                _speed = 15;
-                currentHorizontalSpeed = 15;
+                _speed = SpeedHardCap;
+                currentHorizontalSpeed = SpeedHardCap;
 
             }
 
