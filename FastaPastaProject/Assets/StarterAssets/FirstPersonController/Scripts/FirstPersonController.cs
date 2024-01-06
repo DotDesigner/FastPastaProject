@@ -58,6 +58,8 @@ namespace StarterAssets
         private float MaxSlideSpeed;
         public float VelocityOnFlat;
         public float VelocityRegular;
+        public float SlideBoostFromJumpMultiply;
+        public float SlideBoostFromJumpMultiplyZeroVelocity;
 
         [Tooltip("The maximum speed the player can reach while sliding")]
 
@@ -322,10 +324,14 @@ namespace StarterAssets
                 {
                     _speed = Mathf.Lerp(currentHorizontalSpeed, MaxSlideSpeed, (Time.deltaTime * VelocityRegular));
 
-                    if (slopeAngle <= 2)
+                    if (slopeAngle <= 2 && !slideBoost)
                     {
                         _speed = Mathf.Lerp(currentHorizontalSpeed, 0, (Time.deltaTime * VelocityOnFlat));
 
+                    }
+                    else if (slopeAngle <= 2 && slideBoost)
+                    {
+                        SlopeBoostedSlide();
                     }
                     if (slopeAngle >= 60)
                     {
@@ -348,6 +354,19 @@ namespace StarterAssets
             }
 
             Debug.Log("Sliding Speed: " + _speed);
+        }
+
+        private void SlopeBoostedSlide()
+        {
+            if (slideBoost)
+            {
+                _speed = Mathf.Lerp(currentHorizontalSpeed * SlideBoostFromJumpMultiply, 0, (Time.deltaTime * VelocityOnFlat));
+
+                if (currentHorizontalSpeed <= 2)
+                {
+                    _speed = Mathf.Lerp(SlideBoostFromJumpMultiplyZeroVelocity, 0, Time.deltaTime);
+                }
+            }
         }
 
         private void OnDrawGizmosSelected()
