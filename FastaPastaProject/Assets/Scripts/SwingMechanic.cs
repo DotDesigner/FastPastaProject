@@ -14,7 +14,7 @@ public class SwingMechanic : MonoBehaviour
     public Transform gunTip, cameraTip, player;
     private float maxGrappleDistance = 100f;
     private SpringJoint joints;
-    public Rigidbody rb;
+    private Rigidbody rb;
     public bool isSwinging;
     private bool wasSwingingLastFrame;
     private float speedToTransform;
@@ -98,5 +98,14 @@ public class SwingMechanic : MonoBehaviour
         }
         characterController.enabled = true;
         firstPersonController.ResetVerticalVelocity();
+    }
+
+    public bool IsGrappling()
+    {
+        return joints != null;
+    }
+    public Vector3 GetGrapplePoint()
+    {
+        return grapplePoint;
     }
 }

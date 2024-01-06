@@ -103,8 +103,6 @@ namespace StarterAssets
 
         private const float _threshold = 0.01f;
 
-        public SwingMechanic swingMechanic;
-
         private bool IsCurrentDeviceMouse
         {
             get
