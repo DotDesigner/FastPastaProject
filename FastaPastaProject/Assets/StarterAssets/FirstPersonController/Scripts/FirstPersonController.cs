@@ -53,10 +53,11 @@ namespace StarterAssets
         public float BottomClamp = -90.0f;
 
         [Header("Sliding")]
-        [Tooltip("The speed at which the player slides down slopes")]
-        public float SlideSpeed = 10.0f;
+
         [Tooltip("The maximum speed the player can reach while sliding")]
-        public float MaxSlideSpeed = 50.0f;
+        private float MaxSlideSpeed;
+        public float VelocityOnFlat;
+        public float VelocityRegular;
         private Vector2 smoothDampVelocity;
 
         private Vector3 inputdir;
@@ -72,13 +73,13 @@ namespace StarterAssets
         private float targetspeed;
         private float treshold = 0.01f;
         private float slopeAngle;
-        private float slideSpeed;
         private Vector3 hitNormal;
         private Vector3 slideDirection;
         private float checkDistance;
-        private float currentHorizontalSpeed;
+        public float currentHorizontalSpeed;
         private float speedOffset;
         private float inputMagnitude;
+        private bool isSlide;
 
         // timeout deltatime
         private float _jumpTimeoutDelta;
@@ -134,6 +135,7 @@ namespace StarterAssets
             JumpAndGravity();
             GroundedCheck();
             Move();
+            MaxSlideSpeed = currentHorizontalSpeed * 3;
         }
 
         private void LateUpdate()
@@ -172,17 +174,11 @@ namespace StarterAssets
 
         private void Move()
         {
-            // set target speed based on move speed, sprint speed and if sprint is pressed
             targetspeed = _input.sprint ? SprintSpeed : MoveSpeed;
-
-            // if there is no input, set the target speed to 0
             if (_input.move == Vector2.zero)
             {
-                // Decelerate to a stop smoothly
                 targetspeed = 0.0f;
             }
-
-            // a reference to the players current horizontal velocity
             currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
 
             speedOffset = 0.1f;
@@ -190,13 +186,9 @@ namespace StarterAssets
             _speed = Mathf.Lerp(_speed, targetspeed, Time.deltaTime * SpeedChangeRate);
             Debug.Log("Current Speed: " + _speed);
 
-            // accelerate or decelerate to target speed
             if (currentHorizontalSpeed < targetspeed - speedOffset || currentHorizontalSpeed > targetspeed + speedOffset)
             {
-                // creates curved result rather than a linear one giving a more organic speed change
                 _speed = Mathf.Lerp(currentHorizontalSpeed, targetspeed * inputMagnitude, Time.deltaTime * smoothTime);
-
-                // round speed to 3 decimal places
                 _speed = Mathf.Round(_speed * 1000) / 1000;
             }
             else
@@ -207,20 +199,22 @@ namespace StarterAssets
                 }
             }
             SlopeController();
-            // normalise input direction
             if (_input.move != Vector2.zero)
             {
                 inputdir = transform.right * _input.move.x + transform.forward * _input.move.y;
             }
-            // if there is a move input rotate player when the player is moving
             if (_input.move != Vector2.zero)
             {
-                // move
                 inputdir = transform.right * _input.move.x + transform.forward * _input.move.y;
             }
 
+            if (_speed >= 9)
+            {
+                _speed = 9;
+                currentHorizontalSpeed = 9;
 
-            // move the player
+            }
+
             _controller.Move(inputdir.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
         }
         private void JumpAndGravity()
@@ -300,20 +294,39 @@ namespace StarterAssets
 
             if (Grounded && _input.slide)
             {
+                isSlide = true;
+
+
                 if (IsOnSlope(out hitNormal, out slopeAngle))
                 {
-                    slideSpeed = Mathf.Lerp(0, MaxSlideSpeed, slopeAngle / 90f);
-                    Debug.Log("Sliding Speed: " + slideSpeed);
+                    _speed = Mathf.Lerp(currentHorizontalSpeed, MaxSlideSpeed, (Time.deltaTime * VelocityRegular));
 
+                    if (slopeAngle <= 2)
+                    {
+                        _speed = Mathf.Lerp(currentHorizontalSpeed, 0, (Time.deltaTime * VelocityOnFlat));
+
+                    }
+                    if (slopeAngle >= 60)
+                    {
+                        _speed = Mathf.Lerp(currentHorizontalSpeed, MaxSlideSpeed, (Time.deltaTime * VelocityOnFlat));
+                    }
+
+                    if (Mathf.Abs(_speed) < treshold)
+                    {
+                        _speed = 0;
+                    }
                     slideDirection = new Vector3(hitNormal.x, -hitNormal.y, hitNormal.z);
-                    _controller.Move(slideDirection.normalized * slideSpeed * Time.deltaTime);
+                    _controller.Move(slideDirection.normalized * _speed * Time.deltaTime);
                 }
             }
             else
             {
+                isSlide = false;
                 _speed = Mathf.Lerp(_speed, (_input.move == Vector2.zero) ? 0f : targetspeed, Time.deltaTime * smoothTime);
                 _controller.Move(inputdir.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
             }
+
+            Debug.Log("Sliding Speed: " + _speed);
         }
 
         private void OnDrawGizmosSelected()
