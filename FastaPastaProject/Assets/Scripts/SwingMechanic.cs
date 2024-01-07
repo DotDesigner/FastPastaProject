@@ -99,6 +99,7 @@ public class SwingMechanic : MonoBehaviour
             joints.massScale = 4.5f;
 
             lr.positionCount = 2;
+            currentGrapplePosition = gunTip.position;
         }
     }
 
@@ -106,7 +107,7 @@ public class SwingMechanic : MonoBehaviour
     {
         if (!joints) return;
 
-        currentGrapplePosition = Vector3.Lerp(grapplePoint, grapplePoint, Time.deltaTime * 4f);
+        currentGrapplePosition = Vector3.Lerp(currentGrapplePosition, grapplePoint, Time.deltaTime * 8f);
         lr.SetPosition(0, gunTip.position);
         lr.SetPosition(1, currentGrapplePosition);
     }

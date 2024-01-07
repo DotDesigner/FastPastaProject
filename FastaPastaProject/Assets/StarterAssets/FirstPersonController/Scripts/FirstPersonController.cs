@@ -156,7 +156,7 @@ namespace StarterAssets
             }
             else if (!Grounded && swingMechanic.isSwinging)
             {
-                smoothTime = 0.01f;
+                smoothTime = 0f;
             }
         }
 
@@ -203,7 +203,7 @@ namespace StarterAssets
                     targetspeed = 1f;
                     if (_input.move == Vector2.zero)
                     {
-                        _speed = Mathf.Lerp(_speed, targetspeed * inputMagnitude, Time.deltaTime);
+                        _speed = Mathf.Lerp(_speed, targetspeed * inputMagnitude, (Time.deltaTime/10));
                     }
 
                 }
