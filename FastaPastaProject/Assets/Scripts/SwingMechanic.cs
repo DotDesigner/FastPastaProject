@@ -43,13 +43,13 @@ public class SwingMechanic : MonoBehaviour
     private void Update()
     {
 
-        if (_input.swing && !wasSwingingLastFrame)
+        if (_input.swing && !wasSwingingLastFrame && !firstPersonController.Grounded)
         {
             isSwinging = true;
             StartGrapple();
 
         }
-        else if (!_input.swing && wasSwingingLastFrame && isSwinging)
+        else if ((!_input.swing && wasSwingingLastFrame && isSwinging) || (_input.swing && wasSwingingLastFrame && firstPersonController.Grounded))
         {
             isSwinging = false;
             StopGrapple();
