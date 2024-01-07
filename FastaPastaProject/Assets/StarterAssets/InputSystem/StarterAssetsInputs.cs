@@ -14,6 +14,7 @@ namespace StarterAssets
         public bool sprint;
         public bool slide; // Add this for slide input
         public bool swing;
+        public bool UI;
 
         [Header("Movement Settings")]
         public bool analogMovement;
@@ -39,6 +40,10 @@ namespace StarterAssets
         public void OnJump(InputValue value)
         {
             JumpInput(value.isPressed);
+        }
+        public void OnUI(InputValue value)
+        {
+            UIInput(value.isPressed);
         }
 
         public void OnSprint(InputValue value)
@@ -71,6 +76,10 @@ namespace StarterAssets
         public void JumpInput(bool newJumpState)
         {
             jump = newJumpState;
+        }
+        public void UIInput(bool newUIState)
+        {
+            UI = newUIState;
         }
 
         public void SprintInput(bool newSprintState)

@@ -74,6 +74,7 @@ namespace StarterAssets
         private float _cinemachineTargetPitch;
 
         // player
+        private Vector3 _transferredVelocity;
 
         private float _rotationVelocity;
         private float _verticalVelocity;
@@ -102,7 +103,7 @@ namespace StarterAssets
         private GameObject _mainCamera;
 
         private const float _threshold = 0.01f;
-
+        private bool _isAirborneFromSwing = false;
         private bool IsCurrentDeviceMouse
         {
             get
@@ -191,7 +192,7 @@ namespace StarterAssets
             speedOffset = 0.1f;
             inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
             _speed = Mathf.Lerp(_speed, targetspeed, Time.deltaTime * SpeedChangeRate);
-            Debug.Log("Current Speed: " + _speed);
+
 
             if (currentHorizontalSpeed < targetspeed - speedOffset || currentHorizontalSpeed > targetspeed + speedOffset)
             {
@@ -219,10 +220,9 @@ namespace StarterAssets
             {
                 _speed = SpeedHardCap;
                 currentHorizontalSpeed = SpeedHardCap;
-
             }
-
             _controller.Move(inputdir.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+            Debug.Log("Current Speed: " + _speed);
         }
         private void JumpAndGravity()
 		{
@@ -381,6 +381,19 @@ namespace StarterAssets
                 }
             }
         }
+
+        public void ApplyStoredVelocity(Vector3 velocity)
+        {
+            // Set the transferred velocity
+            _transferredVelocity = velocity;
+
+            // Set the initial speed to the magnitude of the transferred velocity
+            _speed += _transferredVelocity.magnitude;
+
+            // Mark the player as airborne due to swinging
+            _isAirborneFromSwing = true;
+        }
+
 
         private void OnDrawGizmosSelected()
 		{

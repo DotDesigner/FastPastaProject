@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class SwingMechanic : MonoBehaviour
 {
+    public float swingSpeed = 2f;
     private FirstPersonController firstPersonController;
     private StarterAssetsInputs _input;
     private CharacterController characterController;
@@ -18,6 +19,15 @@ public class SwingMechanic : MonoBehaviour
     public bool isSwinging;
     private bool wasSwingingLastFrame;
     private float speedToTransform;
+    private Vector3 currentGrapplePosition;
+    public Transform orientation;
+    public float horizontalThrustForce;
+    public float forwardThrustForce;
+    public float extendCableSpeed;
+
+    private bool isApplayed = false;
+
+    private Vector3 _storedRigidbodyVelocity;
 
 
     private void Start()
@@ -39,13 +49,23 @@ public class SwingMechanic : MonoBehaviour
             StartGrapple();
 
         }
-        else if (!_input.swing && wasSwingingLastFrame)
+        else if (!_input.swing && wasSwingingLastFrame && isSwinging)
         {
             isSwinging = false;
             StopGrapple();
+
+        }
+        if (isApplayed)
+        {
+            firstPersonController.ApplyStoredVelocity(_storedRigidbodyVelocity);
+            isApplayed = false;
         }
         wasSwingingLastFrame = _input.swing;
-
+//        if (joints != null) AirControll();
+        if (firstPersonController._speed >= 15)
+        {
+            firstPersonController._speed = 15;
+        }
     }
     private void LateUpdate()
     {
@@ -62,7 +82,7 @@ public class SwingMechanic : MonoBehaviour
             rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
             speedToTransform = firstPersonController._speed;
             Vector3 directionOfMovement = transform.forward;
-            rb.velocity = directionOfMovement * (speedToTransform * 2);
+            rb.velocity = directionOfMovement * (speedToTransform * swingSpeed);
 
             grapplePoint = hit.point;
             joints = player.gameObject.AddComponent<SpringJoint>();
@@ -85,8 +105,10 @@ public class SwingMechanic : MonoBehaviour
     private void DrawRope()
     {
         if (!joints) return;
+
+        currentGrapplePosition = Vector3.Lerp(grapplePoint, grapplePoint, Time.deltaTime * 4f);
         lr.SetPosition(0, gunTip.position);
-        lr.SetPosition(1, grapplePoint);
+        lr.SetPosition(1, currentGrapplePosition);
     }
     private void StopGrapple()
     {
@@ -94,11 +116,33 @@ public class SwingMechanic : MonoBehaviour
         Destroy(joints);
         if (rb != null)
         {
+            _storedRigidbodyVelocity = rb.velocity /4f;
             Destroy(rb);
+            isApplayed = true;
         }
         characterController.enabled = true;
         firstPersonController.ResetVerticalVelocity();
+
+
     }
+
+  //  private void AirControll()
+   // {
+   //     // right
+   //     if (Input.GetKey(KeyCode.D)) rb.AddForce(orientation.right * horizontalThrustForce * Time.deltaTime);
+        // left
+      //  if (Input.GetKey(KeyCode.A)) rb.AddForce(-orientation.right * horizontalThrustForce * Time.deltaTime);
+
+        //if (Input.GetKey(KeyCode.W)) rb.AddForce(orientation.forward * horizontalThrustForce * Time.deltaTime);
+        // extend cable
+      //  if (Input.GetKey(KeyCode.S))
+      //  {
+       //     float extendedDistanceFromPoint = Vector3.Distance(transform.position, grapplePoint) + extendCableSpeed;
+
+       //     joints.maxDistance = extendedDistanceFromPoint * 0.8f;
+       //     joints.minDistance = extendedDistanceFromPoint * 0.25f;
+       // }
+   // }
 
     public bool IsGrappling()
     {
