@@ -75,6 +75,7 @@ namespace StarterAssets
 
         // player
         private Vector3 _transferredVelocity;
+        public float temporarySwingBoost;
 
         private float _rotationVelocity;
         private float _verticalVelocity;
@@ -90,7 +91,7 @@ namespace StarterAssets
         private float inputMagnitude;
         private bool isSlide;
         private bool coorutineStarted;
-
+        private SwingMechanic swingMechanic;
         // timeout deltatime
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
@@ -103,7 +104,7 @@ namespace StarterAssets
         private GameObject _mainCamera;
 
         private const float _threshold = 0.01f;
-        private bool _isAirborneFromSwing = false;
+        public bool _isAirborneFromSwing = false;
         private bool IsCurrentDeviceMouse
         {
             get
@@ -123,6 +124,7 @@ namespace StarterAssets
 
         private void Start()
         {
+            swingMechanic = gameObject.GetComponent<SwingMechanic>();
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
 #if ENABLE_INPUT_SYSTEM
@@ -143,7 +145,19 @@ namespace StarterAssets
             GroundedCheck();
             Move();
             MaxSlideSpeed = currentHorizontalSpeed * 3;
-
+            if (Grounded)
+            {
+                smoothTime = 2f;
+            }
+            else if (!Grounded && !swingMechanic.isSwinging)
+            {
+                //_speed += 1;
+                smoothTime = 0.1f;
+            }
+            else if (!Grounded && swingMechanic.isSwinging)
+            {
+                smoothTime = 0.01f;
+            }
         }
 
         private void LateUpdate()
@@ -182,39 +196,53 @@ namespace StarterAssets
 
         private void Move()
         {
+            if (_isAirborneFromSwing)
+            {
+                if (!Grounded)
+                {
+                    targetspeed = 1f;
+                    if (_input.move == Vector2.zero)
+                    {
+                        _speed = Mathf.Lerp(_speed, targetspeed * inputMagnitude, Time.deltaTime);
+                    }
+
+                }
+                else
+                {
+                    temporarySwingBoost = 0;
+                    _isAirborneFromSwing = false;
+                }
+            }
             targetspeed = _input.sprint ? SprintSpeed : MoveSpeed;
             if (_input.move == Vector2.zero)
             {
                 targetspeed = 0.0f;
             }
-            currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
-
             speedOffset = 0.1f;
             inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
-            _speed = Mathf.Lerp(_speed, targetspeed, Time.deltaTime * SpeedChangeRate);
+            _speed = Mathf.Lerp(_speed, targetspeed, Time.deltaTime);
 
+            if (Grounded)
+            {
 
-            if (currentHorizontalSpeed < targetspeed - speedOffset || currentHorizontalSpeed > targetspeed + speedOffset)
-            {
-                _speed = Mathf.Lerp(currentHorizontalSpeed, targetspeed * inputMagnitude, Time.deltaTime * smoothTime);
-                _speed = Mathf.Round(_speed * 1000) / 1000;
-            }
-            else
-            {
-                if (Mathf.Abs(_speed) < treshold)
+                currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
+
+                if (currentHorizontalSpeed < targetspeed - speedOffset || currentHorizontalSpeed > targetspeed + speedOffset)
                 {
-                    _speed = 0;
+                    _speed = Mathf.Lerp(currentHorizontalSpeed, targetspeed * inputMagnitude, Time.deltaTime * smoothTime);
+                    _speed = Mathf.Round(_speed * 1000) / 1000;
                 }
+            }
+            if (Mathf.Abs(_speed) < treshold)
+            {
+                _speed = 0;
             }
             SlopeController();
             if (_input.move != Vector2.zero)
             {
                 inputdir = transform.right * _input.move.x + transform.forward * _input.move.y;
             }
-            if (_input.move != Vector2.zero)
-            {
-                inputdir = transform.right * _input.move.x + transform.forward * _input.move.y;
-            }
+
 
             if (_speed >= SpeedHardCap)
             {
@@ -388,7 +416,7 @@ namespace StarterAssets
             _transferredVelocity = velocity;
 
             // Set the initial speed to the magnitude of the transferred velocity
-            _speed += _transferredVelocity.magnitude;
+            _speed += (_transferredVelocity.magnitude / 1.2f);
 
             // Mark the player as airborne due to swinging
             _isAirborneFromSwing = true;

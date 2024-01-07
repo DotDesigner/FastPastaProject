@@ -272,7 +272,7 @@
                     "name": "",
                     "id": "57b8f901-8cb2-4420-bdc4-8de3f2f134c3",
                     "path": "<Keyboard>/r",
-                    "interactions": "",
+                    "interactions": "Press(behavior=2)",
                     "processors": "",
                     "groups": "KeyboardMouse",
                     "action": "UI",

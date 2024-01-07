@@ -116,7 +116,7 @@ public class SwingMechanic : MonoBehaviour
         Destroy(joints);
         if (rb != null)
         {
-            _storedRigidbodyVelocity = rb.velocity /4f;
+            _storedRigidbodyVelocity = rb.velocity /6f;
             Destroy(rb);
             isApplayed = true;
         }
