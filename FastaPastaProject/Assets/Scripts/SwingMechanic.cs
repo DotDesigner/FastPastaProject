@@ -13,6 +13,7 @@ public class SwingMechanic : MonoBehaviour
     private Vector3 grapplePoint;
     public LayerMask whatIsGrappleavle;
     public Transform gunTip, cameraTip, player;
+    [SerializeField]
     private float maxGrappleDistance = 100f;
     private SpringJoint joints;
     private Rigidbody rb;
@@ -118,11 +119,13 @@ public class SwingMechanic : MonoBehaviour
         if (rb != null)
         {
             _storedRigidbodyVelocity = rb.velocity /6f;
+            firstPersonController.ResetVerticalVelocity();
             Destroy(rb);
             isApplayed = true;
+
         }
         characterController.enabled = true;
-        firstPersonController.ResetVerticalVelocity();
+
 
 
     }
