@@ -69,6 +69,7 @@ namespace StarterAssets
         private Vector3 inputdir;
         public Vector3 previousPosition;
         public float _speed;
+        public float _verticalVelocity;
 
         // cinemachine
         private float _cinemachineTargetPitch;
@@ -78,7 +79,7 @@ namespace StarterAssets
         public float temporarySwingBoost;
 
         private float _rotationVelocity;
-        private float _verticalVelocity;
+
         private float _terminalVelocity = 53.0f;
         private float targetspeed;
         private float treshold = 0.01f;
@@ -92,6 +93,7 @@ namespace StarterAssets
         private bool isSlide;
         private bool coorutineStarted;
         private SwingMechanic swingMechanic;
+        private WallrunMechanic wallrunMechanic;
         // timeout deltatime
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
@@ -127,6 +129,7 @@ namespace StarterAssets
             swingMechanic = gameObject.GetComponent<SwingMechanic>();
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
+            wallrunMechanic = gameObject.GetComponent<WallrunMechanic>();
 #if ENABLE_INPUT_SYSTEM
             _playerInput = GetComponent<PlayerInput>();
 #else
@@ -145,19 +148,7 @@ namespace StarterAssets
             GroundedCheck();
             Move();
             MaxSlideSpeed = currentHorizontalSpeed * 3;
-            if (Grounded)
-            {
-                smoothTime = 2f;
-            }
-            else if (!Grounded && !swingMechanic.isSwinging)
-            {
-                //_speed += 1;
-                smoothTime = 0.1f;
-            }
-            else if (!Grounded && swingMechanic.isSwinging)
-            {
-                smoothTime = 0f;
-            }
+            MovementChangeVelocityCOntrol();
         }
 
         private void LateUpdate()
@@ -256,25 +247,15 @@ namespace StarterAssets
 		{
 			if (Grounded)
 			{
-				// reset the fall timeout timer
 				_fallTimeoutDelta = FallTimeout;
-
-				// stop our velocity dropping infinitely when grounded
 				if (_verticalVelocity < 0.0f)
 				{
 					_verticalVelocity = -2f;
 				}
-
-				// Jump
 				if (_input.jump && _jumpTimeoutDelta <= 0.0f)
 				{
-
-
-					// the square root of H * -2 * G = how much velocity needed to reach desired height
 					_verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
 				}
-
-				// jump timeout
 				if (_jumpTimeoutDelta >= 0.0f)
 				{
 					_jumpTimeoutDelta -= Time.deltaTime;
@@ -282,19 +263,14 @@ namespace StarterAssets
 			}
 			else
 			{
-
-				// reset the jump timeout timer
 				_jumpTimeoutDelta = JumpTimeout;
-
-				// fall timeout
 				if (_fallTimeoutDelta >= 0.0f)
 				{
 					_fallTimeoutDelta -= Time.deltaTime;
 				}
-
-				// if we are not grounded, do not jump
 				_input.jump = false;
 			}
+
             if (!Grounded)
             {
                 slideBoost = true;
@@ -305,17 +281,27 @@ namespace StarterAssets
                 coorutineStarted = true;
                 StartCoroutine(JumpSlopeBoost());
             }
-
-
-			// apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
-
-                if (_verticalVelocity < _terminalVelocity)
-                {
-                    _verticalVelocity += Gravity * Time.deltaTime;
-                }
-
-
+            if (_verticalVelocity < _terminalVelocity)
+            {
+                _verticalVelocity += Gravity * Time.deltaTime;
+            }
 		}
+        private void MovementChangeVelocityCOntrol()
+        {
+            if (Grounded)
+            {
+                smoothTime = 2f;
+            }
+            else if (!Grounded && !swingMechanic.isSwinging)
+            {
+                //_speed += 1;
+                smoothTime = 0.1f;
+            }
+            else if (!Grounded && swingMechanic.isSwinging)
+            {
+                smoothTime = 0f;
+            }
+        }
 
         public void ResetVerticalVelocity()
         {
