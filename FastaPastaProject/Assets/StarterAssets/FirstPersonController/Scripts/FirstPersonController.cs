@@ -158,36 +158,8 @@ namespace StarterAssets
             Move();
             MaxSlideSpeed = currentHorizontalSpeed * 3;
             MovementChangeVelocityCOntrol();
+            WallJumpController();
 
-            if (wallJumpWasPressedRight && !Grounded)
-            {
-                // Smoothly move towards the target rightward position at a faster speed
-                transform.position = Vector3.MoveTowards(transform.position, leftwardJumpTarget, rightwardJumpSpeed * Time.deltaTime);
-                // Check if the target position is reached
-                if (Vector3.Distance(transform.position, leftwardJumpTarget) < 0.1f)
-                {
-                   wallrunMechanic.isRightwardJump = false;
-                    wallJumpWasPressedRight = false;
-                }
-
-            }
-            if (wallJumpWasPressedLeft && !Grounded)
-            {
-                // Smoothly move towards the target rightward position at a faster speed
-                transform.position = Vector3.MoveTowards(transform.position, rightwardJumpTarget, rightwardJumpSpeed * Time.deltaTime);
-                // Check if the target position is reached
-                if (Vector3.Distance(transform.position, rightwardJumpTarget) < 0.1f)
-                {
-                    wallrunMechanic.isLeftwardJump = false;
-                    wallJumpWasPressedLeft = false;
-                }
-
-            }
-            if (Grounded || swingMechanic.isSwinging)
-            {
-                wallJumpWasPressedLeft = false;
-                wallJumpWasPressedRight = false;
-            }
         }
 
         private void LateUpdate()
@@ -339,6 +311,40 @@ namespace StarterAssets
                 _verticalVelocity += Gravity * Time.deltaTime;
             }
 		}
+
+        private void WallJumpController()
+        {
+
+            if (wallJumpWasPressedRight && !Grounded)
+            {
+                // Smoothly move towards the target rightward position at a faster speed
+                transform.position = Vector3.MoveTowards(transform.position, leftwardJumpTarget, rightwardJumpSpeed * Time.deltaTime);
+                // Check if the target position is reached
+                if (Vector3.Distance(transform.position, leftwardJumpTarget) < 0.1f)
+                {
+                    wallrunMechanic.isRightwardJump = false;
+                    wallJumpWasPressedRight = false;
+                }
+
+            }
+            if (wallJumpWasPressedLeft && !Grounded)
+            {
+                // Smoothly move towards the target rightward position at a faster speed
+                transform.position = Vector3.MoveTowards(transform.position, rightwardJumpTarget, rightwardJumpSpeed * Time.deltaTime);
+                // Check if the target position is reached
+                if (Vector3.Distance(transform.position, rightwardJumpTarget) < 0.1f)
+                {
+                    wallrunMechanic.isLeftwardJump = false;
+                    wallJumpWasPressedLeft = false;
+                }
+
+            }
+            if (Grounded || swingMechanic.isSwinging)
+            {
+                wallJumpWasPressedLeft = false;
+                wallJumpWasPressedRight = false;
+            }
+        }
 
         public void LeftWallRunJump()
         {
