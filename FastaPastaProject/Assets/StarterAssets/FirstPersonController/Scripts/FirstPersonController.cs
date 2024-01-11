@@ -71,6 +71,9 @@ namespace StarterAssets
         public float _speed;
         public float _verticalVelocity;
 
+        [Header("WallRampJumpForce")]
+        public float rightwardJumpSpeed = 100.0f;
+
         // cinemachine
         private float _cinemachineTargetPitch;
 
@@ -98,12 +101,18 @@ namespace StarterAssets
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
 
+
+        private Vector3 rightwardJumpTarget;
+        private Vector3 leftwardJumpTarget;
+
 #if ENABLE_INPUT_SYSTEM
         private PlayerInput _playerInput;
 #endif
         private CharacterController _controller;
         private StarterAssetsInputs _input;
         private GameObject _mainCamera;
+        private bool wallJumpWasPressedLeft;
+        private bool wallJumpWasPressedRight;
 
         private const float _threshold = 0.01f;
         public bool _isAirborneFromSwing = false;
@@ -149,6 +158,36 @@ namespace StarterAssets
             Move();
             MaxSlideSpeed = currentHorizontalSpeed * 3;
             MovementChangeVelocityCOntrol();
+
+            if (wallJumpWasPressedRight && !Grounded)
+            {
+                // Smoothly move towards the target rightward position at a faster speed
+                transform.position = Vector3.MoveTowards(transform.position, leftwardJumpTarget, rightwardJumpSpeed * Time.deltaTime);
+                // Check if the target position is reached
+                if (Vector3.Distance(transform.position, leftwardJumpTarget) < 0.1f)
+                {
+                   wallrunMechanic.isRightwardJump = false;
+                    wallJumpWasPressedRight = false;
+                }
+
+            }
+            if (wallJumpWasPressedLeft && !Grounded)
+            {
+                // Smoothly move towards the target rightward position at a faster speed
+                transform.position = Vector3.MoveTowards(transform.position, rightwardJumpTarget, rightwardJumpSpeed * Time.deltaTime);
+                // Check if the target position is reached
+                if (Vector3.Distance(transform.position, rightwardJumpTarget) < 0.1f)
+                {
+                    wallrunMechanic.isLeftwardJump = false;
+                    wallJumpWasPressedLeft = false;
+                }
+
+            }
+            if (Grounded || swingMechanic.isSwinging)
+            {
+                wallJumpWasPressedLeft = false;
+                wallJumpWasPressedRight = false;
+            }
         }
 
         private void LateUpdate()
@@ -187,6 +226,7 @@ namespace StarterAssets
 
         private void Move()
         {
+
             if (_isAirborneFromSwing)
             {
                 if (!Grounded)
@@ -231,7 +271,14 @@ namespace StarterAssets
             SlopeController();
             if (_input.move != Vector2.zero)
             {
-                inputdir = transform.right * _input.move.x + transform.forward * _input.move.y;
+                if (wallrunMechanic.isWallRunning && wallrunMechanic.disableADKeys)
+                {
+                    inputdir = transform.forward * _input.move.y;  // Disable sideways movement
+                }
+                else
+                {
+                    inputdir = transform.right * _input.move.x + transform.forward * _input.move.y;
+                }
             }
 
 
@@ -240,8 +287,12 @@ namespace StarterAssets
                 _speed = SpeedHardCap;
                 currentHorizontalSpeed = SpeedHardCap;
             }
-            _controller.Move(inputdir.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
-            Debug.Log("Current Speed: " + _speed);
+            if (!wallJumpWasPressedLeft || !wallJumpWasPressedRight)
+            {
+                _controller.Move(inputdir.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+            }
+
+            //Debug.Log("Current Speed: " + _speed);
         }
         private void JumpAndGravity()
 		{
@@ -252,18 +303,18 @@ namespace StarterAssets
 				{
 					_verticalVelocity = -2f;
 				}
-				if (_input.jump && _jumpTimeoutDelta <= 0.0f)
-				{
-					_verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
-				}
-				if (_jumpTimeoutDelta >= 0.0f)
+                if (_input.jump && _jumpTimeoutDelta <= 0.0f)
+                {
+                    _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
+                }
+                if (_jumpTimeoutDelta >= 0.0f)
 				{
 					_jumpTimeoutDelta -= Time.deltaTime;
 				}
 			}
-			else
+			if (!Grounded && !wallrunMechanic.isWallRunning)
 			{
-				_jumpTimeoutDelta = JumpTimeout;
+                _jumpTimeoutDelta = JumpTimeout;
 				if (_fallTimeoutDelta >= 0.0f)
 				{
 					_fallTimeoutDelta -= Time.deltaTime;
@@ -273,6 +324,8 @@ namespace StarterAssets
 
             if (!Grounded)
             {
+                LeftWallRunJump();
+                RightWallRunJump();
                 slideBoost = true;
                 coorutineStarted = false;
             }
@@ -286,6 +339,45 @@ namespace StarterAssets
                 _verticalVelocity += Gravity * Time.deltaTime;
             }
 		}
+
+        public void LeftWallRunJump()
+        {
+            if (_input.jump && _jumpTimeoutDelta <= 0.0f && wallrunMechanic.isLeftwardJump)
+            {
+                _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
+                Vector3 verticalJumpForceLeft = transform.up * _verticalVelocity;
+
+                _controller.Move(verticalJumpForceLeft * Time.deltaTime);
+
+                rightwardJumpTarget = transform.position + transform.right * wallrunMechanic.Offset;
+                wallJumpWasPressedLeft = true;
+               wallrunMechanic.JumpOffWall();
+                Debug.Log("left");
+            }
+            if (_jumpTimeoutDelta >= 0.0f)
+            {
+                _jumpTimeoutDelta -= Time.deltaTime;
+            }
+        }
+        public void RightWallRunJump()
+        {
+            if (_input.jump && _jumpTimeoutDelta <= 0.0f && wallrunMechanic.isRightwardJump)
+            {
+                _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
+                Vector3 verticalJumpForceRight = transform.up * _verticalVelocity;
+
+                _controller.Move(verticalJumpForceRight * Time.deltaTime);
+
+                leftwardJumpTarget = transform.position + -transform.right * wallrunMechanic.Offset;
+                wallJumpWasPressedRight = true;
+                wallrunMechanic.JumpOffWall();
+                Debug.Log("right");
+            }
+            if (_jumpTimeoutDelta >= 0.0f)
+            {
+                _jumpTimeoutDelta -= Time.deltaTime;
+            }
+        }
         private void MovementChangeVelocityCOntrol()
         {
             if (Grounded)
@@ -380,7 +472,7 @@ namespace StarterAssets
                 _controller.Move(inputdir.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
             }
 
-            Debug.Log("Sliding Speed: " + _speed);
+          //  Debug.Log("Sliding Speed: " + _speed);
         }
 
         private void SlopeBoostedSlide()

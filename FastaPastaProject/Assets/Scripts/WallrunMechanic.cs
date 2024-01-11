@@ -12,11 +12,17 @@ public class WallrunMechanic : MonoBehaviour
     public float WallRunSpeed = 6.0f;
     public float WallRunGravity = -5.0f;
     public LayerMask WallLayers;
+    public float Offset = 100f;
 
     private RaycastHit wallHit;
-    private bool isWallRunning = false;
-    private bool disableADKeys = false;
+    public bool isWallRunning = false;
+    public bool disableADKeys = false;
     private Vector3 wallRunDirection = Vector3.zero;
+    public bool isRightwardJump = false;
+    public bool isLeftwardJump = false;
+
+    public float wallRunCooldown = 1.0f; // Cooldown duration in seconds
+    private float wallRunCooldownTimer = 0.0f;
 
     private void Awake()
     {
@@ -29,13 +35,19 @@ public class WallrunMechanic : MonoBehaviour
         if (disableADKeys)
         {
             _input.move.x = 0;
+            Debug.Log("Disabled");
         }
         CheckForWallRun();
+
+        if (wallRunCooldownTimer > 0)
+        {
+            wallRunCooldownTimer -= Time.deltaTime;
+        }
     }
 
     private void CheckForWallRun()
     {
-        if (IsTouchingWall() && !firstPersonController.Grounded)
+        if (IsTouchingWall() && !firstPersonController.Grounded && wallRunCooldownTimer <= 0)
         {
             StartWallRun();
         }
@@ -49,12 +61,16 @@ public class WallrunMechanic : MonoBehaviour
     {
         if (Physics.Raycast(transform.position, transform.right, out wallHit, 1f, WallLayers))
         {
-            wallRunDirection = -transform.right; // Opposite direction to the right wall
+            wallRunDirection = -transform.right;
+            isRightwardJump = true;
+// Opposite direction to the right wall
             return true;
+
         }
         else if (Physics.Raycast(transform.position, -transform.right, out wallHit, 1f, WallLayers))
         {
             wallRunDirection = transform.right; // Opposite direction to the left wall
+            isLeftwardJump = true;
             return true;
         }
         return false;
@@ -65,7 +81,6 @@ public class WallrunMechanic : MonoBehaviour
         isWallRunning = true;
         firstPersonController._verticalVelocity = WallRunGravity;
         disableADKeys = true;
-        JumpOffWall();
 
     }
 
@@ -73,15 +88,16 @@ public class WallrunMechanic : MonoBehaviour
     {
         if (isWallRunning)
         {
-
             isWallRunning = false;
             disableADKeys = false;
         }
+        isRightwardJump = false;
+        isLeftwardJump = false;
     }
 
     public void JumpOffWall()
     {
-
+        wallRunCooldownTimer = wallRunCooldown;
     }
 
 }
