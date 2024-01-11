@@ -122,7 +122,6 @@ public class SwingMechanic : MonoBehaviour
             firstPersonController.ResetVerticalVelocity();
             Destroy(rb);
             isApplayed = true;
-
         }
         characterController.enabled = true;
 

@@ -113,6 +113,7 @@ namespace StarterAssets
         private GameObject _mainCamera;
         private bool wallJumpWasPressedLeft;
         private bool wallJumpWasPressedRight;
+        public bool _hasDoubleJumped = true;
 
         private const float _threshold = 0.01f;
         public bool _isAirborneFromSwing = false;
@@ -171,7 +172,12 @@ namespace StarterAssets
         {
             // set sphere position, with offset
             Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
+            bool wasGrounded = Grounded;
             Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore);
+            if (!wasGrounded && Grounded)
+            {
+                _hasDoubleJumped = true;
+            }
         }
 
         private void CameraRotation()
@@ -275,24 +281,42 @@ namespace StarterAssets
 				{
 					_verticalVelocity = -2f;
 				}
-                if (_input.jump && _jumpTimeoutDelta <= 0.0f)
+                if (_input.jump && _hasDoubleJumped && _jumpTimeoutDelta <= 0.0f)
                 {
                     _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
+                    _hasDoubleJumped = false;
+                    _input.jump = false;
                 }
                 if (_jumpTimeoutDelta >= 0.0f)
 				{
 					_jumpTimeoutDelta -= Time.deltaTime;
-				}
+                }
 			}
-			if (!Grounded && !wallrunMechanic.isWallRunning)
+
+			if (!Grounded && !wallrunMechanic.isWallRunning && _hasDoubleJumped)
 			{
+
                 _jumpTimeoutDelta = JumpTimeout;
 				if (_fallTimeoutDelta >= 0.0f)
 				{
-					_fallTimeoutDelta -= Time.deltaTime;
+                    _fallTimeoutDelta -= Time.deltaTime;
 				}
-				_input.jump = false;
+
 			}
+            if (!Grounded && !wallrunMechanic.isWallRunning)
+            {
+                if (_input.jump && !_hasDoubleJumped && _jumpTimeoutDelta <= 0.0f)
+                {
+                    _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
+                    _hasDoubleJumped = true; // Mark that double jump is used
+                    _input.jump = false;
+                    Debug.Log("doubleJump");
+                }
+                if (_hasDoubleJumped)
+                {
+                    _input.jump = false;
+                }
+            }
 
             if (!Grounded)
             {
