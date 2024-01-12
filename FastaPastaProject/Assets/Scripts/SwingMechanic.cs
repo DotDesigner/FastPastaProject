@@ -124,28 +124,33 @@ public class SwingMechanic : MonoBehaviour
             isApplayed = true;
         }
         characterController.enabled = true;
-
-
-
     }
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red; // Set the color of the Gizmos
+        if (cameraTip != null)
+        {
+            // Draw a sphere at the maximum grapple distance
+            Gizmos.DrawWireSphere(cameraTip.position, maxGrappleDistance);
+        }
+    }
+    //  private void AirControll()
+    // {
+    //     // right
+    //     if (Input.GetKey(KeyCode.D)) rb.AddForce(orientation.right * horizontalThrustForce * Time.deltaTime);
+    // left
+    //  if (Input.GetKey(KeyCode.A)) rb.AddForce(-orientation.right * horizontalThrustForce * Time.deltaTime);
 
-  //  private void AirControll()
-   // {
-   //     // right
-   //     if (Input.GetKey(KeyCode.D)) rb.AddForce(orientation.right * horizontalThrustForce * Time.deltaTime);
-        // left
-      //  if (Input.GetKey(KeyCode.A)) rb.AddForce(-orientation.right * horizontalThrustForce * Time.deltaTime);
+    //if (Input.GetKey(KeyCode.W)) rb.AddForce(orientation.forward * horizontalThrustForce * Time.deltaTime);
+    // extend cable
+    //  if (Input.GetKey(KeyCode.S))
+    //  {
+    //     float extendedDistanceFromPoint = Vector3.Distance(transform.position, grapplePoint) + extendCableSpeed;
 
-        //if (Input.GetKey(KeyCode.W)) rb.AddForce(orientation.forward * horizontalThrustForce * Time.deltaTime);
-        // extend cable
-      //  if (Input.GetKey(KeyCode.S))
-      //  {
-       //     float extendedDistanceFromPoint = Vector3.Distance(transform.position, grapplePoint) + extendCableSpeed;
-
-       //     joints.maxDistance = extendedDistanceFromPoint * 0.8f;
-       //     joints.minDistance = extendedDistanceFromPoint * 0.25f;
-       // }
-   // }
+    //     joints.maxDistance = extendedDistanceFromPoint * 0.8f;
+    //     joints.minDistance = extendedDistanceFromPoint * 0.25f;
+    // }
+    // }
 
     public bool IsGrappling()
     {

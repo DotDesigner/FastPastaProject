@@ -225,6 +225,7 @@ namespace StarterAssets
             targetspeed = _input.sprint ? SprintSpeed : MoveSpeed;
             if (_input.move == Vector2.zero)
             {
+               // AnimationController.instance.StopRunning();
                 targetspeed = 0.0f;
             }
             speedOffset = 0.1f;
@@ -249,6 +250,7 @@ namespace StarterAssets
             SlopeController();
             if (_input.move != Vector2.zero)
             {
+                //AnimationController.instance.Running();
                 if (wallrunMechanic.isWallRunning && wallrunMechanic.disableADKeys)
                 {
                     inputdir = transform.forward * _input.move.y;  // Disable sideways movement
@@ -349,7 +351,7 @@ namespace StarterAssets
                     wallrunMechanic.isRightwardJump = false;
                     wallJumpWasPressedRight = false;
                 }
-
+                _hasDoubleJumped = false;
             }
             if (wallJumpWasPressedLeft && !Grounded)
             {
@@ -361,7 +363,7 @@ namespace StarterAssets
                     wallrunMechanic.isLeftwardJump = false;
                     wallJumpWasPressedLeft = false;
                 }
-
+                _hasDoubleJumped = false;
             }
             if (Grounded || swingMechanic.isSwinging)
             {
