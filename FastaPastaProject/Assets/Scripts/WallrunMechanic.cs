@@ -59,7 +59,7 @@ public class WallrunMechanic : MonoBehaviour
 
     private bool IsTouchingWall()
     {
-        if (Physics.Raycast(transform.position, transform.right, out wallHit, 1f, WallLayers))
+        if (Physics.Raycast(transform.position, transform.right, out wallHit, 1.5f, WallLayers))
         {
             wallRunDirection = -transform.right;
             isRightwardJump = true;
@@ -67,7 +67,7 @@ public class WallrunMechanic : MonoBehaviour
             return true;
 
         }
-        else if (Physics.Raycast(transform.position, -transform.right, out wallHit, 1f, WallLayers))
+        else if (Physics.Raycast(transform.position, -transform.right, out wallHit, 1.5f, WallLayers))
         {
             wallRunDirection = transform.right; // Opposite direction to the left wall
             isLeftwardJump = true;
