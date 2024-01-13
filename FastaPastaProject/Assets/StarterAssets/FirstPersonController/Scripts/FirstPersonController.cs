@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Cinemachine;
+using System.Collections;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -76,7 +77,6 @@ namespace StarterAssets
 
         // cinemachine
         private float _cinemachineTargetPitch;
-
         // player
         private Vector3 _transferredVelocity;
         public float temporarySwingBoost;
@@ -225,7 +225,7 @@ namespace StarterAssets
             targetspeed = _input.sprint ? SprintSpeed : MoveSpeed;
             if (_input.move == Vector2.zero)
             {
-               // AnimationController.instance.StopRunning();
+                AnimationController.instance.StopRunning();
                 targetspeed = 0.0f;
             }
             speedOffset = 0.1f;
@@ -250,7 +250,7 @@ namespace StarterAssets
             SlopeController();
             if (_input.move != Vector2.zero)
             {
-                //AnimationController.instance.Running();
+                AnimationController.instance.Running();
                 if (wallrunMechanic.isWallRunning && wallrunMechanic.disableADKeys)
                 {
                     inputdir = transform.forward * _input.move.y;  // Disable sideways movement
@@ -272,6 +272,14 @@ namespace StarterAssets
                 _controller.Move(inputdir.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
             }
 
+            if (targetspeed > 0 && _speed > 5.5f)
+            {
+                AnimationController.instance.StartRunFast();
+            }
+            if (_speed < 5.5f)
+            {
+                AnimationController.instance.StopRunFast();
+            }
             //Debug.Log("Current Speed: " + _speed);
         }
         private void JumpAndGravity()
@@ -469,8 +477,7 @@ namespace StarterAssets
             if (Grounded && _input.slide)
             {
                 isSlide = true;
-
-
+                CameraController.instanceCamera.StartSlideCamera();
                 if (IsOnSlope(out hitNormal, out slopeAngle))
                 {
                     _speed = Mathf.Lerp(currentHorizontalSpeed, MaxSlideSpeed, (Time.deltaTime * VelocityRegular));
@@ -500,6 +507,7 @@ namespace StarterAssets
             else
             {
                 isSlide = false;
+                CameraController.instanceCamera.StopSlideCamera();
                 _speed = Mathf.Lerp(_speed, (_input.move == Vector2.zero) ? 0f : targetspeed, Time.deltaTime * smoothTime);
                 _controller.Move(inputdir.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
             }
