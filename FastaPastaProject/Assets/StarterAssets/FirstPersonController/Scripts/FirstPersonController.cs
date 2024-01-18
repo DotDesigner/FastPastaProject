@@ -28,6 +28,7 @@ namespace StarterAssets
         [Space(10)]
         [Tooltip("The height the player can jump")]
         public float JumpHeight = 1.2f;
+        public float SecondJumpHeigh = 0.8f;
         [Tooltip("The character uses its own gravity value. The engine default is -9.81f")]
         public float Gravity = -15.0f;
 
@@ -286,6 +287,7 @@ namespace StarterAssets
 		{
 			if (Grounded)
 			{
+                
 				_fallTimeoutDelta = FallTimeout;
 				if (_verticalVelocity < 0.0f)
 				{
@@ -317,7 +319,7 @@ namespace StarterAssets
             {
                 if (_input.jump && !_hasDoubleJumped && _jumpTimeoutDelta <= 0.0f)
                 {
-                    _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
+                    _verticalVelocity = Mathf.Sqrt(SecondJumpHeigh * -2f * Gravity);
                     _hasDoubleJumped = true; // Mark that double jump is used
                     _input.jump = false;
                     Debug.Log("doubleJump");
@@ -487,7 +489,7 @@ namespace StarterAssets
                         _speed = Mathf.Lerp(currentHorizontalSpeed, 0, (Time.deltaTime * VelocityOnFlat));
 
                     }
-                    else if (slopeAngle <= 2 && slideBoost)
+                    else if (slopeAngle <= 2 && slideBoost && currentHorizontalSpeed <= 7)
                     {
                         SlopeBoostedSlide();
                     }
