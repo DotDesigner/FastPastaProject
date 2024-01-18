@@ -47,14 +47,14 @@ public class SwingMechanic : MonoBehaviour
         if (_input.swing && !wasSwingingLastFrame && !firstPersonController.Grounded)
         {
             isSwinging = true;
-            AnimationController.instance.TurnOffAnimator();
+            //AnimationController.instance.TurnOffAnimator();
             StartGrapple();
 
         }
         else if ((!_input.swing && wasSwingingLastFrame && isSwinging) || (_input.swing && wasSwingingLastFrame && firstPersonController.Grounded))
         {
             isSwinging = false;
-            AnimationController.instance.TurnOnAnimator();
+           // AnimationController.instance.TurnOnAnimator();
             StopGrapple();
 
         }

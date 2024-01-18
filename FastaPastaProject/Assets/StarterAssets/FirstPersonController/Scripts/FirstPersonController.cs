@@ -225,7 +225,7 @@ namespace StarterAssets
             targetspeed = _input.sprint ? SprintSpeed : MoveSpeed;
             if (_input.move == Vector2.zero)
             {
-                AnimationController.instance.StopRunning();
+                //AnimationController.instance.StopRunning();
                 targetspeed = 0.0f;
             }
             speedOffset = 0.1f;
@@ -250,7 +250,7 @@ namespace StarterAssets
             SlopeController();
             if (_input.move != Vector2.zero)
             {
-                AnimationController.instance.Running();
+                //AnimationController.instance.Running();
                 if (wallrunMechanic.isWallRunning && wallrunMechanic.disableADKeys)
                 {
                     inputdir = transform.forward * _input.move.y;  // Disable sideways movement
@@ -274,11 +274,11 @@ namespace StarterAssets
 
             if (targetspeed > 0 && _speed > 5.5f)
             {
-                AnimationController.instance.StartRunFast();
+                //AnimationController.instance.StartRunFast();
             }
             if (_speed < 5.5f)
             {
-                AnimationController.instance.StopRunFast();
+                //AnimationController.instance.StopRunFast();
             }
             //Debug.Log("Current Speed: " + _speed);
         }
