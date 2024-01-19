@@ -7,6 +7,9 @@ TagManager:
   - CinemachineTarget
   - Cinemachine
   - UI
+  - StartTrigger
+  - FinishTrigger
+  - Trigger
   layers:
   - Default
   - TransparentFX
