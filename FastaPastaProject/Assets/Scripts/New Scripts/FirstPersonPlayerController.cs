@@ -23,16 +23,17 @@ public class FirstPersonPlayerController : MonoBehaviour
     [Header("NotChangableValues")]
     public float speed;
     public TextMeshProUGUI speedText; // Add this field
+    public bool isGrounded;
+    public Vector3 currentVelocity; // Store the velocity of the player
 
 
     private float xRotation = 0f;
     private bool isPauseGame;
     private CinemachineVirtualCamera cinemachineCamera;
     private CharacterController characterController; // CharacterController component
-    private Vector3 currentVelocity; // Store the velocity of the player
-    private bool isGrounded;
     private float jumpTimeoutDelta;
     private bool isMoving = false;
+    public Vector3 targetDirection;
 
 
 
@@ -107,7 +108,7 @@ public class FirstPersonPlayerController : MonoBehaviour
 
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
-        Vector3 targetDirection = transform.right * horizontal + transform.forward * vertical;
+        targetDirection = transform.right * horizontal + transform.forward * vertical;
         if (targetDirection.magnitude > 1)
         {
             targetDirection.Normalize();
