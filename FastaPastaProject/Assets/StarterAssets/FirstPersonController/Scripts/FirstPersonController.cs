@@ -110,7 +110,7 @@ namespace StarterAssets
         private PlayerInput _playerInput;
 #endif
         private CharacterController _controller;
-        private StarterAssetsInputs _input;
+        public StarterAssetsInputs _input;
         private GameObject _mainCamera;
         private bool wallJumpWasPressedLeft;
         private bool wallJumpWasPressedRight;
@@ -281,7 +281,7 @@ namespace StarterAssets
             {
                 //AnimationController.instance.StopRunFast();
             }
-            //Debug.Log("Current Speed: " + _speed);
+            Debug.Log("Current Speed: " + _speed);
         }
         private void JumpAndGravity()
 		{
