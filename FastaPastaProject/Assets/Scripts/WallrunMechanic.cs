@@ -6,7 +6,6 @@ using UnityEngine;
 public class WallrunMechanic : MonoBehaviour
 {
     private FirstPersonController firstPersonController;
-    private StarterAssetsInputs _input;
 
     [Header("Wall Running")]
     public float WallRunSpeed = 6.0f;
@@ -27,14 +26,13 @@ public class WallrunMechanic : MonoBehaviour
     private void Awake()
     {
         firstPersonController = GetComponent<FirstPersonController>();
-        _input = GetComponent<StarterAssetsInputs>();
     }
 
     private void Update()
     {
         if (disableADKeys)
         {
-            _input.move.x = 0;
+            firstPersonController._input.move.x = 0;
             Debug.Log("Disabled");
         }
         CheckForWallRun();
@@ -90,12 +88,27 @@ public class WallrunMechanic : MonoBehaviour
         {
             isWallRunning = false;
             disableADKeys = false;
+            // Gradually reset vertical velocity to avoid abrupt changes
+            StartCoroutine(ResetVerticalVelocitySmoothly());
         }
         isRightwardJump = false;
         isLeftwardJump = false;
     }
+    IEnumerator ResetVerticalVelocitySmoothly()
+    {
+        float duration = 0.5f; // Duration to reset velocity
+        float startVelocity = firstPersonController._verticalVelocity;
+        float elapsed = 0;
 
-    public void JumpOffWall()
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            firstPersonController._verticalVelocity = Mathf.Lerp(startVelocity, 0, elapsed / duration);
+            yield return null;
+        }
+    }
+
+        public void JumpOffWall()
     {
         wallRunCooldownTimer = wallRunCooldown;
     }

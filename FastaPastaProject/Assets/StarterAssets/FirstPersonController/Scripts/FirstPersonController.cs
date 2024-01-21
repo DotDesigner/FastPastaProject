@@ -74,7 +74,7 @@ namespace StarterAssets
         public float _verticalVelocity;
 
         [Header("WallRampJumpForce")]
-        public float rightwardJumpSpeed = 100.0f;
+        public float wallJumpForce = 100.0f;
 
         // cinemachine
         private float _cinemachineTargetPitch;
@@ -354,26 +354,26 @@ namespace StarterAssets
             if (wallJumpWasPressedRight && !Grounded)
             {
                 // Smoothly move towards the target rightward position at a faster speed
-                transform.position = Vector3.MoveTowards(transform.position, leftwardJumpTarget, rightwardJumpSpeed * Time.deltaTime);
+                Vector3 jumpDirection = (leftwardJumpTarget - transform.position).normalized;
+                _controller.Move(jumpDirection * wallJumpForce * Time.deltaTime);
                 // Check if the target position is reached
                 if (Vector3.Distance(transform.position, leftwardJumpTarget) < 0.1f)
                 {
                     wallrunMechanic.isRightwardJump = false;
                     wallJumpWasPressedRight = false;
                 }
-                _hasDoubleJumped = false;
             }
             if (wallJumpWasPressedLeft && !Grounded)
             {
                 // Smoothly move towards the target rightward position at a faster speed
-                transform.position = Vector3.MoveTowards(transform.position, rightwardJumpTarget, rightwardJumpSpeed * Time.deltaTime);
+                Vector3 jumpDirection = (rightwardJumpTarget - transform.position).normalized;
+                _controller.Move(jumpDirection * wallJumpForce * Time.deltaTime);
                 // Check if the target position is reached
                 if (Vector3.Distance(transform.position, rightwardJumpTarget) < 0.1f)
                 {
                     wallrunMechanic.isLeftwardJump = false;
                     wallJumpWasPressedLeft = false;
                 }
-                _hasDoubleJumped = false;
             }
             if (Grounded || swingMechanic.isSwinging)
             {
