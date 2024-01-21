@@ -21,9 +21,13 @@ namespace StarterAssets
         public float SprintSpeed = 6.0f;
         [Tooltip("Rotation speed of the character")]
         public float RotationSpeed = 1.0f;
-        [Tooltip("Acceleration and deceleration")]
-        public float SpeedChangeRate = 10.0f;
-        public float smoothTime = 2f;
+        private float desiredAcceleration;
+        private float smoothTime = 2f;
+        [Tooltip("Defines how acceleration changes with speed")]
+        public AnimationCurve accelerationCurve;
+       // public float acceleration;
+        public float decceleration;
+        public float accelerationJump;
         public float SpeedHardCap;
 
         [Space(10)]
@@ -237,9 +241,11 @@ namespace StarterAssets
                 //AnimationController.instance.StopRunning();
                 targetspeed = 0.0f;
             }
+
+
             speedOffset = 0.1f;
             inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
-            _speed = Mathf.Lerp(_speed, targetspeed, Time.deltaTime);
+            _speed = Mathf.Lerp(_speed, targetspeed, Time.deltaTime * desiredAcceleration);
 
             if (Grounded)
             {
@@ -430,14 +436,19 @@ namespace StarterAssets
         }
         private void MovementChangeVelocityCOntrol()
         {
-            if (Grounded)
+            if (Grounded && _input.move != Vector2.zero)
             {
-                smoothTime = 2f;
+                desiredAcceleration = accelerationCurve.Evaluate(_speed);
+                smoothTime = desiredAcceleration;
+            }
+            else if(Grounded && _input.move == Vector2.zero)
+            {
+                smoothTime = decceleration;
             }
             else if (!Grounded && !swingMechanic.isSwinging)
             {
                 //_speed += 1;
-                smoothTime = 0.1f;
+                smoothTime = accelerationJump;
             }
             else if (!Grounded && swingMechanic.isSwinging)
             {
