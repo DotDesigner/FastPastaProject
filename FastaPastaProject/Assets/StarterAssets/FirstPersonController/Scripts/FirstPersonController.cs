@@ -1,6 +1,7 @@
 ﻿using Cinemachine;
 using System.Collections;
 using UnityEngine;
+using TMPro;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -58,14 +59,18 @@ namespace StarterAssets
 
         [Header("Sliding")]
         public bool slideBoost = false;
-        private float MaxSlideSpeed;
         public float VelocityOnFlat;
         public float VelocityRegular;
         public float SlideBoostFromJumpMultiply;
         public float SlideBoostFromJumpMultiplyZeroVelocity;
 
-        [Tooltip("The maximum speed the player can reach while sliding")]
+        [Header ("UI")]
+        [SerializeField]private TMP_Text speedText;
 
+        private float MaxSlideSpeed;
+
+        [Header("WallRampJumpForce")]
+        public float wallJumpForce = 100.0f;
 
         [Header("NOT CHENGABLE")]
         private Vector3 inputdir;
@@ -73,8 +78,7 @@ namespace StarterAssets
         public float _speed;
         public float _verticalVelocity;
 
-        [Header("WallRampJumpForce")]
-        public float wallJumpForce = 100.0f;
+
 
         // cinemachine
         private float _cinemachineTargetPitch;
@@ -150,6 +154,7 @@ namespace StarterAssets
             // reset our timeouts on start
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
+            speedText = GameObject.FindGameObjectWithTag("UISpeed").GetComponent<TextMeshProUGUI>();
         }
 
         private void Update()
@@ -161,7 +166,10 @@ namespace StarterAssets
             MaxSlideSpeed = currentHorizontalSpeed * 3;
             MovementChangeVelocityCOntrol();
             WallJumpController();
-
+            if (speedText != null)
+            {
+                speedText.text = "Speed: " + _speed.ToString("F2") + " m/s";
+            }
         }
 
         private void LateUpdate()
@@ -281,7 +289,7 @@ namespace StarterAssets
             {
                 //AnimationController.instance.StopRunFast();
             }
-            Debug.Log("Current Speed: " + _speed);
+        //    Debug.Log("Current Speed: " + _speed);
         }
         private void JumpAndGravity()
 		{
