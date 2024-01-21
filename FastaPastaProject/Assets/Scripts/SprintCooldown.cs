@@ -5,7 +5,9 @@ using UnityEngine.UI;
 public class SprintCooldown : MonoBehaviour
 {
     public FirstPersonController firstPersonController;
-    public Slider cooldownSlider; // Reference to the UI Slider
+    public Slider rightCooldownSlider; // Reference to the UI Slider
+    public Slider leftCooldownSlider; // Reference to the UI Slider
+
 
     [SerializeField] private float sprintDuration = 2.0f;
     [SerializeField] private float sprintCooldown = 4.0f;
@@ -16,10 +18,15 @@ public class SprintCooldown : MonoBehaviour
 
     private void Start()
     {
-        if (cooldownSlider != null)
+        if (rightCooldownSlider != null)
         {
-            cooldownSlider.maxValue = sprintCooldown;
-            cooldownSlider.value = 0;
+            rightCooldownSlider.maxValue = sprintDuration;
+            rightCooldownSlider.value = 0;
+        }
+        if (leftCooldownSlider != null)
+        {
+            leftCooldownSlider.maxValue = sprintDuration;
+            leftCooldownSlider.value = 0;
         }
     }
     private void Update()
@@ -79,9 +86,13 @@ public class SprintCooldown : MonoBehaviour
     }
     private void UpdateSlider()
     {
-        if (cooldownSlider != null)
+        if (rightCooldownSlider != null)
         {
-            cooldownSlider.value = sprintTimer;
+            rightCooldownSlider.value = sprintTimer;
+        }
+        if (leftCooldownSlider != null)
+        {
+            leftCooldownSlider.value = sprintTimer;
         }
     }
 }
