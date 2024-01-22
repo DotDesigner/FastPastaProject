@@ -4,16 +4,19 @@ using UnityEngine.UI;
 
 public class SprintCooldown : MonoBehaviour
 {
+    [Header ("UI")]
     public FirstPersonController firstPersonController;
     public Slider rightCooldownSlider; // Reference to the UI Slider
     public Slider leftCooldownSlider; // Reference to the UI Slider
 
-
+    [Header("Settings")]
     [SerializeField] private float sprintDuration = 2.0f;
     [SerializeField] private float sprintCooldown = 4.0f;
     [SerializeField] private float sprintTimer = 0.0f;
     [SerializeField] private float cooldownDelayTimer = 0.0f; // Timer for the cooldown delay
-    private bool isSprinting = false;
+
+    [Header ("NOT CHANGABLE")]
+    public bool isSprinting = false;
     private bool isCooldown = false;
 
     private void Start()

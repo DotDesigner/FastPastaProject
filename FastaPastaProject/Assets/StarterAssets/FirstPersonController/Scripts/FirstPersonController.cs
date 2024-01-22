@@ -25,7 +25,7 @@ namespace StarterAssets
         private float smoothTime = 2f;
         [Tooltip("Defines how acceleration changes with speed")]
         public AnimationCurve accelerationCurve;
-       // public float acceleration;
+        public float accelerationSprint;
         public float decceleration;
         public float accelerationJump;
         public float SpeedHardCap;
@@ -106,6 +106,7 @@ namespace StarterAssets
         private bool coorutineStarted;
         private SwingMechanic swingMechanic;
         private WallrunMechanic wallrunMechanic;
+        private SprintCooldown sperintCooldown;
         // timeout deltatime
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
@@ -149,6 +150,7 @@ namespace StarterAssets
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
             wallrunMechanic = gameObject.GetComponent<WallrunMechanic>();
+            sperintCooldown = GetComponent<SprintCooldown>();
 #if ENABLE_INPUT_SYSTEM
             _playerInput = GetComponent<PlayerInput>();
 #else
@@ -436,10 +438,14 @@ namespace StarterAssets
         }
         private void MovementChangeVelocityCOntrol()
         {
-            if (Grounded && _input.move != Vector2.zero)
+            if (Grounded && _input.move != Vector2.zero && !sperintCooldown.isSprinting)
             {
                 desiredAcceleration = accelerationCurve.Evaluate(_speed);
                 smoothTime = desiredAcceleration;
+            }
+            else if (Grounded && _input.move != Vector2.zero && sperintCooldown.isSprinting)
+            {
+                smoothTime = accelerationSprint;
             }
             else if(Grounded && _input.move == Vector2.zero)
             {
